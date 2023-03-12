@@ -116,7 +116,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 	fmt.Println(larkcore.Prettify(event.Event.Sender))
 	client := initialization.GetLarkClient()
 	req := larkcontact.NewGetUserReqBuilder().
-		UserId(*event.Event.Sender.SenderId.UserId).
+		UserId(*event.Event.Sender.SenderId.OpenId).
 		Build()
 	resp, err := client.Contact.User.Get(ctx, req)
 	if err != nil {
