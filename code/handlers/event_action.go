@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -173,7 +174,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	msg = append(msg, completions)
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 
-	fmt.Printf("Q: %+v \n", a.info)
+	fmt.Printf(larkcore.Prettify(a.info))
 	fmt.Printf("Q: %s %s %s \n", *a.info.msgId, *a.info.chatId, *a.info.sessionId)
 	fmt.Println("Q: ", a.info.qParsed)
 	// if new topic

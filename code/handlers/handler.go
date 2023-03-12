@@ -8,6 +8,7 @@ import (
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
+	larkcontact "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -113,6 +114,16 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 	}
 	fmt.Println("")
 	fmt.Println(larkcore.Prettify(event.Event.Sender))
+	client := initialization.GetLarkClient()
+	req := larkcontact.NewGetUserReqBuilder().
+		UserId(*event.Event.Sender.SenderId.UserId).
+		Build()
+	resp, err := client.Contact.User.Get(ctx, req)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(larkcore.Prettify(resp))
+	}
 	// fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	content := event.Event.Message.Content
