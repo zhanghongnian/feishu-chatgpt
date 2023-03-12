@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
-	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/utils"
 	"start-feishubot/utils/audio"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type MsgInfo struct {
+	openId      *string
 	handlerType HandlerType
 	msgType     string
 	msgId       *string
@@ -174,9 +176,25 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	msg = append(msg, completions)
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 
-	fmt.Printf(larkcore.Prettify(a.info))
-	fmt.Printf("Q: %s %s %s \n", *a.info.msgId, *a.info.chatId, *a.info.sessionId)
+	// fmt.Printf(larkcore.Prettify(a.info))
+	// fmt.Printf("Q: %s %s %s \n", *a.info.msgId, *a.info.chatId, *a.info.sessionId)
 	fmt.Println("Q: ", a.info.qParsed)
+
+	record := &services.FeiShuRecord{
+		OpenId:   *a.info.openId,
+		Answer:   a.info.qParsed,
+		CreateAt: time.Now(),
+	}
+	if len(msg) == 2 {
+		record.Question = msg[1].Content
+	}
+	ctx := context.TODO()
+	db := initialization.GetMysqlClient()
+	err = services.InsertFeiShuRecord(ctx, db, record)
+	if err != nil {
+		fmt.Println("InsertFeiShuRecord failed ", err.Error())
+	}
+
 	// if new topic
 	if len(msg) == 2 {
 		fmt.Println("new topic", msg[1].Content)

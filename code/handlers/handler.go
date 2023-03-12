@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"start-feishubot/initialization"
+	"start-feishubot/services"
+
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkcontact "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
-	"start-feishubot/initialization"
-	"start-feishubot/services"
 )
 
 // 责任链
@@ -138,6 +139,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		sessionId = msgId
 	}
 	msgInfo := MsgInfo{
+		openId:      event.Event.Sender.SenderId.OpenId,
 		handlerType: handlerType,
 		msgType:     msgType,
 		msgId:       msgId,

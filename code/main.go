@@ -2,20 +2,17 @@ package main
 
 import (
 	"context"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"log"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
-
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/pflag"
-
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
-
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"github.com/larksuite/oapi-sdk-go/v3/event/dispatcher"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -26,6 +23,7 @@ func main() {
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
+	initialization.InitMysqlClient(*config)
 	gpt := services.NewChatGPT(*config)
 	handlers.InitHandlers(gpt, *config)
 
