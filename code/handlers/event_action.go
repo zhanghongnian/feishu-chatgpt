@@ -3,8 +3,9 @@ package handlers
 import (
 	"context"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"os"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/utils"
@@ -31,7 +32,7 @@ type Action interface {
 	Execute(a *ActionInfo) bool
 }
 
-type ProcessedUniqueAction struct { //消息唯一性
+type ProcessedUniqueAction struct { // 消息唯一性
 }
 
 func (*ProcessedUniqueAction) Execute(a *ActionInfo) bool {
@@ -42,7 +43,7 @@ func (*ProcessedUniqueAction) Execute(a *ActionInfo) bool {
 	return true
 }
 
-type ProcessMentionAction struct { //是否机器人应该处理
+type ProcessMentionAction struct { // 是否机器人应该处理
 }
 
 func (*ProcessMentionAction) Execute(a *ActionInfo) bool {
@@ -148,7 +149,7 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 		replayImageByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
 			a.info.qParsed)
 
-		//replayImageByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
+		// replayImageByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
 		return false
 	}
 
@@ -171,9 +172,13 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	}
 	msg = append(msg, completions)
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
-	//if new topic
+
+	fmt.Printf("Q: %+v \n", a.info)
+	fmt.Printf("Q: %s %s %s \n", *a.info.msgId, *a.info.chatId, *a.info.sessionId)
+	fmt.Println("Q: ", a.info.qParsed)
+	// if new topic
 	if len(msg) == 2 {
-		//fmt.Println("new topic", msg[1].Content)
+		fmt.Println("new topic", msg[1].Content)
 		sendNewTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
 			completions.Content)
 		return false
@@ -196,16 +201,16 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 		return true
 	}
 
-	//判断是否是语音
+	// 判断是否是语音
 	if a.info.msgType == "audio" {
 		fileKey := a.info.fileKey
-		//fmt.Printf("fileKey: %s \n", fileKey)
+		// fmt.Printf("fileKey: %s \n", fileKey)
 		msgId := a.info.msgId
-		//fmt.Println("msgId: ", *msgId)
+		// fmt.Println("msgId: ", *msgId)
 		req := larkim.NewGetMessageResourceReqBuilder().MessageId(
 			*msgId).FileKey(fileKey).Type("file").Build()
 		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
-		//fmt.Println(resp, err)
+		// fmt.Println(resp, err)
 		if err != nil {
 			fmt.Println(err)
 			return true
@@ -214,12 +219,12 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 		resp.WriteFile(f)
 		defer os.Remove(f)
 
-		//fmt.Println("f: ", f)
+		// fmt.Println("f: ", f)
 		output := fmt.Sprintf("%s.mp3", fileKey)
 		// 等待转换完成
 		audio.OggToWavByPath(f, output)
 		defer os.Remove(output)
-		//fmt.Println("output: ", output)
+		// fmt.Println("output: ", output)
 
 		text, err := a.handler.gpt.AudioToText(output)
 		if err != nil {
@@ -227,8 +232,8 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 			sendMsg(*a.ctx, "🤖️：语音转换失败，请稍后再试～", a.info.msgId)
 			return false
 		}
-		//删除文件
-		//fmt.Println("text: ", text)
+		// 删除文件
+		// fmt.Println("text: ", text)
 		a.info.qParsed = text
 		return true
 	}
