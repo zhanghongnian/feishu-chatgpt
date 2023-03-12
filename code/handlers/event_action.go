@@ -11,6 +11,7 @@ import (
 	"start-feishubot/utils"
 	"start-feishubot/utils/audio"
 
+	larkcontact "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
@@ -180,15 +181,29 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	// fmt.Printf("Q: %s %s %s \n", *a.info.msgId, *a.info.chatId, *a.info.sessionId)
 	fmt.Println("Q: ", a.info.qParsed)
 
+	ctx := context.TODO()
+	var name string
+	client := initialization.GetLarkClient()
+	req := larkcontact.NewGetUserReqBuilder().
+		UserId(*a.info.openId).
+		Build()
+	resp, err := client.Contact.User.Get(ctx, req)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		// fmt.Println(larkcore.Prettify(resp))
+		// fmt.Println(*resp.Data.User.Name)
+		name = *resp.Data.User.Name
+	}
 	record := &services.FeiShuRecord{
 		OpenId:   *a.info.openId,
-		Answer:   a.info.qParsed,
+		Name:     name,
+		Question: a.info.qParsed,
 		CreateAt: time.Now(),
 	}
 	if len(msg) == 2 {
-		record.Question = msg[1].Content
+		record.Answer = msg[1].Content
 	}
-	ctx := context.TODO()
 	db := initialization.GetMysqlClient()
 	err = services.InsertFeiShuRecord(ctx, db, record)
 	if err != nil {
