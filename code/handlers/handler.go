@@ -123,7 +123,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		fmt.Println(err)
 	} else {
 		// fmt.Println(larkcore.Prettify(resp))
-		fmt.Println(resp.Data.User.Name)
+		fmt.Println(*resp.Data.User.Name)
 	}
 	// fmt.Println(larkcore.Prettify(event.Event.Message))
 
