@@ -203,6 +203,8 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	}
 	if len(msg) == 2 {
 		record.Answer = msg[1].Content
+	} else {
+		record.Answer = completions.Content
 	}
 	db := initialization.GetMysqlClient()
 	err = services.InsertFeiShuRecord(ctx, db, record)
